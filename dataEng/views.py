@@ -136,8 +136,9 @@ def cleanCallLog(request):
         md_data[instance.userId]= {'callLog' : instance.call_log['list']}
     
     processed_md_dict = {}
-    for key,mobile_list in md_data.items():
-        print(md_data[key]['callLog'][0]['name'])
+    for key,call_list in md_data.items():
+        for call in call_list:
+            logging.critical(call)
         
 
     return HttpResponse("done")
