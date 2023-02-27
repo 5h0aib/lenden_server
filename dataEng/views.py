@@ -117,10 +117,9 @@ def cleanEmailData(request):
             
 
     for k, v in processed_data_dict.items():
-        if v['num_emails_uber.com'] != 0:
-            logging.critical(k)
-            logging.critical(v)
-            logging.critical("------------------------")
+        logging.critical(k)
+        logging.critical(v)
+        logging.critical("------------------------")
     
     # jsonString = json.dumps(data_dict)
     # jsonFile = open("email_data.json", "w")
@@ -132,14 +131,21 @@ def cleanEmailData(request):
 def cleanCallLog(request):
     md_instances = DeepSocial.objects.all()
     md_data = {}
+    # Getting Rid of duplicates
     for instance in md_instances:
-        md_data[instance.userId]= {'callLog' : instance.call_log['list']}
-    
+        md_data[instance.userId]= instance.call_log['list']
+    # Making the necessary data lists
     processed_md_dict = {}
     for key,call_list in md_data.items():
-        for call in call_list:
-            logging.critical(call)
-        
+        processed_md_dict[key] = {'incoming_calls_list':[],'incoming_call_contacts':[]}
+        for callLog in call_list:
+            if(callLog['call_type'] == "CallType.incoming"):
+                processed_md_dict[key]['incoming_calls_list'].append(callLog)
+
+        # for k, v in processed_md_dict.items():
+        #     logging.critical(k)
+        #     logging.critical(v)
+        #     logging.critical("------------------------")
 
     return HttpResponse("done")
 
