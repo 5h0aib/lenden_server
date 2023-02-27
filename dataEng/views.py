@@ -195,4 +195,40 @@ def cleanCallLog(request):
         processed_clds_data[userId]['contacts_list'] = [createContactsList(
             list['call_logs'][0]), createContactsList(list['call_logs'][1]), createContactsList(list['call_logs'][2])]
 
-    return HttpResponse(processed_clds_data['abdullahalakib12@gmail.com']['call_logs'][0])
+    for userId, list in processed_clds_data.items():
+        pday_pperson_avg_no_incoming_calls = []
+        pday_pperson_avg_no_outgoing_calls = []
+        pday_pperson_avg_no_missed_calls = []
+        if (userId == 'samriaadiba1234@gmail.com'):
+
+            for contact in set(list['contacts_list'][0]):
+                # last_date = get_last_date(contact,list['call_logs'][0])
+                last_date = date(1990, 1, 1)
+                first_date = date.today()
+                count = 0
+                for call in list['call_logs'][0]:
+                    date_time_obj = parse(call['date']).date()
+                    if (call['number'] == contact):
+                        count = count + 1
+                        if (last_date < date_time_obj):
+                            last_date = date_time_obj
+                        if (first_date > date_time_obj):
+                            first_date = date_time_obj
+                # logging.critical(last_date)
+                # logging.critical(first_date)
+                # logging.critical(count)
+                try:
+                    pday_pperson_avg_no_outgoing_calls.append(
+                        count/getDaysBetween(str(last_date), str(first_date)))
+                except ZeroDivisionError:
+                    pday_pperson_avg_no_outgoing_calls.append(count)
+
+            processed_clds_data[userId]['Per day Per person Avg No. of Outgoing calls'] = pday_pperson_avg_no_outgoing_calls
+
+        else:
+            break
+
+    logging.critical(processed_clds_data['samriaadiba1234@gmail.com']
+                     ['Per day Per person Avg No. of Outgoing calls'])
+
+    return HttpResponse(processed_clds_data['samriaadiba1234@gmail.com']['Per day Per person Avg No. of Outgoing calls'])
