@@ -129,3 +129,16 @@ def cleanEmailData(request):
     return HttpResponse("done")
 
 
+def cleanCallLog(request):
+    md_instances = DeepSocial.objects.all()
+    md_data = {}
+    for instance in md_instances:
+        md_data[instance.userId]= {'callLog' : instance.call_log['list']}
+    
+    processed_md_dict = {}
+    for key,mobile_list in md_data.items():
+        print(md_data[key]['callLog'][0]['name'])
+        
+
+    return HttpResponse("done")
+
