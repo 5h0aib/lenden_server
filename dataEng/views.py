@@ -3,8 +3,9 @@ from django.http import FileResponse, HttpResponse
 from base.models import *
 import logging
 import json
-from datetime import datetime, time
+from datetime import datetime, time ,date
 from dateutil.parser import parse
+from dataEng.utils import *
 
 
 def cleanEmailData(request):
@@ -148,8 +149,32 @@ def cleanCallLog(request):
             elif str(obj['call_type']) == "CallType.rejected" or str(obj['call_type']) == "CallType.missed":
                 missed_calls.append(obj)
 
-        processed_clds_data[userId] = [
+        processed_clds_data[userId]['call_logs'] = [
             outgoing_calls, incoming_calls, missed_calls]
-        
+
+    for userId, list in processed_clds_data.items():
+        del list['list']
+        processed_clds_data[userId]['contacts_list'] = [createContactsList(
+            list['call_logs'][0]), createContactsList(list['call_logs'][1]), createContactsList(list['call_logs'][2])]
+    last_date = date(1990, 1, 1)
+    first_date = date.today()
+     #     date_time_obj = parse(call['date'])
+    logging.critical(last_date)
+    logging.critical(first_date)
+    # for userId, list in processed_clds_data.items():
+    #    pday_pperson_avg_no_incoming_calls = []
+    #    pday_pperson_avg_no_outgoing_calls = []
+    #    pday_pperson_avg_no_missed_calls = []
+    #    for contact in set(list['contacts_list'][0]):
+    #         # last_date = get_last_date(contact,list['call_logs'][0])
+    #         last_date = datetime.date(1990, 1, 1)
+    #         first_date = datetime.date.today()
+    #         logging.critical(last_date)
+    #         logging.critical(first_date)
+            # for call in list['call_logs'][0]:
+            #     date_time_obj = parse(call['date'])
+            #     if(call['number']== contact):
+
+
     
-    return HttpResponse("y")
+    return HttpResponse(processed_clds_data['abdullahalakib12@gmail.com']['contacts_list'])
