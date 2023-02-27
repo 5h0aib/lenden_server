@@ -3,7 +3,7 @@ from django.http import FileResponse, HttpResponse
 from base.models import *
 import logging
 import json
-from datetime import datetime, time ,date
+from datetime import datetime, time, date
 from dateutil.parser import parse
 from dataEng.utils import *
 
@@ -123,7 +123,7 @@ def cleanEmailData(request):
     #     logging.critical(k)
     #     logging.critical(v)
     #     logging.critical("------------------------")
-    
+
     # jsonString = json.dumps(data_dict)
     # jsonFile = open("email_data.json", "w")
     # jsonFile.write(jsonString)
@@ -134,6 +134,8 @@ def cleanEmailData(request):
 def cleanCallLog(request):
     clds_instances = DeepSocial.objects.all()
     processed_clds_data = {}
+
+    # Removing duplicates
     for clds_instance in clds_instances:
         processed_clds_data[clds_instance.userId] = clds_instance.call_log
 
@@ -141,6 +143,14 @@ def cleanCallLog(request):
         outgoing_calls = []
         incoming_calls = []
         missed_calls = []
+
+        # Calculating Per day No. of persons called
+        total_calls = len(list['list'])
+        per_day_no_of_persons_called = total_calls / \
+            getDaysBetween(list['list'][0]['date'], list['list'][-1]['date'])
+        processed_clds_data[userId]['per_day_no_of_persons_called'] = per_day_no_of_persons_called
+        logging.critical(per_day_no_of_persons_called)
+        # Seperating call logs based on type
         for obj in list['list']:
             if str(obj['call_type']) == "CallType.outgoing":
                 outgoing_calls.append(obj)
@@ -153,24 +163,49 @@ def cleanCallLog(request):
             outgoing_calls, incoming_calls, missed_calls]
 
     for userId, list in processed_clds_data.items():
+        # Calculating Per day Total Duration of Incoming calls
+
+        # removing original combined list of calls
         del list['list']
+        # Creating contact list for each type of call
         processed_clds_data[userId]['contacts_list'] = [createContactsList(
             list['call_logs'][0]), createContactsList(list['call_logs'][1]), createContactsList(list['call_logs'][2])]
-    last_date = date(1990, 1, 1)
 
 
     for userId, list in processed_clds_data.items():
        pday_pperson_avg_no_incoming_calls = []
        pday_pperson_avg_no_outgoing_calls = []
        pday_pperson_avg_no_missed_calls = []
-       for contact in set(list['contacts_list'][0]):
-            # last_date = get_last_date(contact,list['call_logs'][0])
-            last_date = date(1990, 1, 1)
-            first_date = date.today()
-            for call in list['call_logs'][0]:
-                date_time_obj = parse(call['date']).date()
-                if(call['number']== contact):
+       if(userId == 'samriaadiba1234@gmail.com'):
+           
+            for contact in set(list['contacts_list'][0]):
+                    # last_date = get_last_date(contact,list['call_logs'][0])
+                    last_date = date(1990, 1, 1)
+                    first_date = date.today()
+                    count = 0 
+                    for call in list['call_logs'][0]:
+                        date_time_obj = parse(call['date']).date()
+                        if(call['number']== contact):
+                            count = count + 1
+                            if(last_date < date_time_obj):
+                                last_date = date_time_obj
+                            if(first_date > date_time_obj):
+                                first_date = date_time_obj
+                    # logging.critical(last_date)
+                    # logging.critical(first_date)
+                    # logging.critical(count)
+                    try:
+                        pday_pperson_avg_no_outgoing_calls.append(count/getDaysBetween(str(last_date),str(first_date)))
+                    except ZeroDivisionError:
+                        pday_pperson_avg_no_outgoing_calls.append(count)
+                
+            processed_clds_data[userId]['Per day Per person Avg No. of Outgoing calls'] = pday_pperson_avg_no_outgoing_calls
+        
+       else:
+           break
+    
+    logging.critical(processed_clds_data['samriaadiba1234@gmail.com']['Per day Per person Avg No. of Outgoing calls'])
 
 
     
-    return HttpResponse(processed_clds_data['abdullahalakib12@gmail.com']['contacts_list'])
+    return HttpResponse(processed_clds_data['samriaadiba1234@gmail.com']['Per day Per person Avg No. of Outgoing calls'])
