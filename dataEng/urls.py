@@ -3,5 +3,6 @@ from django.urls import path,include
 
 urlpatterns = [
     path('cleanEmailLog', views.cleanEmailData, name = "email"),
-    path('cleanCallLog',views.cleanCallLog, name = "mobile")
+    path('cleanCallLog',views.cleanCallLog, name = "mobile"),
+    path('cleanAppLog',views.cleanAppLog, name = "app"),
 ]

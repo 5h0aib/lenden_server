@@ -232,3 +232,39 @@ def cleanCallLog(request):
                      ['Per day Per person Avg No. of Outgoing calls'])
 
     return HttpResponse(processed_clds_data['samriaadiba1234@gmail.com']['Per day Per person Avg No. of Outgoing calls'])
+
+# Social Foot Print ----------------------------------------------------------------------------------------------------------------------------------------
+def cleanAppLog(request):
+    al_instances = SocialFp.objects.all()
+    al_data = {}
+
+    for al_instance in al_instances:
+        for app_log in al_instance.app_list['list']:
+            al_data[al_instance.userId] = al_instance.app_list
+
+    finsavy_list = ['com.bKash.customerapp', 'com.konasl.nagad', 'com.expertoption', 'com.ibbl.cellfin',  'com.binance.dev', 
+                    'com.dbbl.nexus.pay', 'com.thecitybank.citytouch', 'eraapps.bankasia.bdinternetbanking.apps', 'com.desco.ssl',
+                      'com.coinbase.android', 'com.cibl.eblsky', 'com.fsiblbd.fsiblcloud', 'com.mtb.mobilebanking']
+    
+    travel_list = ['com.webparkit.railsheba', 'com.airbnb.android', 'com.gozayaan.app', 'net.sharetrip', 'com.obhai', 'com.booking', 
+                   'com.shohoz.rides', 'com.shohoz.bus.android', 'com.shohoz.dtrainpwa', 'com.ubercab', 'com.pathao.user']
+    
+    ecom_list = ['com.daraz.android', 'com.bikroy', 'com.alibaba.intl.android.apps.poseidon', 'com.rokomari', 'com.amazon.mShop.android.shopping', 
+                 'com.swap.swap_ecommerce', 'bd.com.evaly.evalyshop',  'com.pickaboo.app', 'com.flipkart.android', 'com.gorillamove']
+    
+    processed_al_data = {}
+    
+    for userId, list in al_data.items():
+        processed_al_data[userId] = {"num_of_finsavy_apps":0 ,"isFinsavyApp":False , "num_of_travel_apps":0 , "isTravelApp":False , "num_of_ecom_apps":0 , "isEcomApp":False }
+        for apps in list['list']:
+            if(apps['appName'] in finsavy_list):
+                processed_al_data[userId]['num_of_finsavy_apps'] = processed_al_data[userId]['num_of_finsavy_apps'] + 1
+                processed_al_data[userId]['isFinsavyApp'] = True
+            if(apps['appName'] in travel_list):
+                processed_al_data[userId]['num_of_travel_apps'] = processed_al_data[userId]['num_of_travel_apps'] + 1
+                processed_al_data[userId]['isTravelApp'] = True
+            if(apps['appName'] in ecom_list):
+                processed_al_data[userId]['num_of_ecom_apps'] = processed_al_data[userId]['num_of_ecom_apps'] + 1
+                processed_al_data[userId]['isEcomApp'] = True
+                
+    return HttpResponse('yes i m done')
