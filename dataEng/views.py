@@ -135,9 +135,18 @@ def cleanCallLog(request):
     clds_instances = DeepSocial.objects.all()
     processed_clds_data = {}
 
-    # Removing duplicates
     for clds_instance in clds_instances:
+        # Removing data before 2021
+        truncated_call_log = []
+        for call_log in clds_instance.call_log['list']:
+            default_earliest_date = datetime(2020, 12, 31)
+            if parse(call_log['date']) > default_earliest_date:
+                truncated_call_log.append(call_log)
+        # Removing duplicates
+        clds_instance.call_log['list'] = truncated_call_log
+
         processed_clds_data[clds_instance.userId] = clds_instance.call_log
+    logging.critical(len(processed_clds_data))
 
     for userId, list in processed_clds_data.items():
         outgoing_calls = []
@@ -147,9 +156,10 @@ def cleanCallLog(request):
         # Calculating Per day No. of persons called
         total_calls = len(list['list'])
         per_day_no_of_persons_called = total_calls / \
-            getDaysBetween(list['list'][0], list['list'][-1])
+            getDaysBetween(list['list'][0]['date'], list['list'][-1]['date'])
         processed_clds_data[userId]['per_day_no_of_persons_called'] = per_day_no_of_persons_called
-        logging.critical(per_day_no_of_persons_called)
+        logging.critical(getDaysBetween(
+            list['list'][0]['date'], list['list'][-1]['date']))
         # Seperating call logs based on type
         for obj in list['list']:
             if str(obj['call_type']) == "CallType.outgoing":
@@ -164,30 +174,25 @@ def cleanCallLog(request):
 
     for userId, list in processed_clds_data.items():
         # Calculating Per day Total Duration of Incoming calls
+        duration = 0.0
+        days_between = getDaysBetween(
+            list['call_logs'][1][0]['date'], list['call_logs'][1][-1]['date'])
 
+        for i in range(2):
+            duration = 0.0
+            days_between = getDaysBetween(
+                list['call_logs'][1][0]['date'], list['call_logs'][1][-1]['date'])
+            for call_log in (list['call_logs'][i]):
+                duration = float(
+                    call_log['duration']) + duration
+            if i == 0:
+                processed_clds_data[userId]['per_day_total_duration_outgoing_calls'] = duration/days_between
+            elif i == 1:
+                processed_clds_data[userId]['per_day_total_duration_incoming_calls'] = duration/days_between
         # removing original combined list of calls
         del list['list']
         # Creating contact list for each type of call
         processed_clds_data[userId]['contacts_list'] = [createContactsList(
             list['call_logs'][0]), createContactsList(list['call_logs'][1]), createContactsList(list['call_logs'][2])]
 
-    last_date = date(1990, 1, 1)
-    first_date = date.today()
-    #     date_time_obj = parse(call['date'])
-    logging.critical(last_date)
-    logging.critical(first_date)
-    # for userId, list in processed_clds_data.items():
-    #    pday_pperson_avg_no_incoming_calls = []
-    #    pday_pperson_avg_no_outgoing_calls = []
-    #    pday_pperson_avg_no_missed_calls = []
-    #    for contact in set(list['contacts_list'][0]):
-    #         # last_date = get_last_date(contact,list['call_logs'][0])
-    #         last_date = datetime.date(1990, 1, 1)
-    #         first_date = datetime.date.today()
-    #         logging.critical(last_date)
-    #         logging.critical(first_date)
-    # for call in list['call_logs'][0]:
-    #     date_time_obj = parse(call['date'])
-    #     if(call['number']== contact):
-   # Calculating Per day No. of persons called
     return HttpResponse(processed_clds_data['abdullahalakib12@gmail.com']['call_logs'][0])

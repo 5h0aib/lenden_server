@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
-import pymysql 
+import pymysql
 pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-9jp*%_(_#-ht6jn%)$%l&z*jglpcyzx&d*i9+anwf5z4w^^nzt
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '59.153.103.56','0.0.0.0']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '59.153.103.56', '0.0.0.0']
 
 
 # Application definition
@@ -82,7 +82,7 @@ WSGI_APPLICATION = 'lenden_server.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'shababe$default',
+        'NAME': 'shababe$fdefault',
         'USER': 'root',
         'PASSWORD': '',
         'HOST': 'localhost',
