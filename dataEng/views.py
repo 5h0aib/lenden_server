@@ -5,6 +5,7 @@ import logging
 import json
 from datetime import datetime, time
 from dateutil.parser import parse
+from dataEng.utils import *
 
 
 def cleanEmailData(request):
@@ -137,11 +138,11 @@ def cleanCallLog(request):
     for clds_instance in clds_instances:
         processed_clds_data[clds_instance.userId] = clds_instance.call_log
 
-    for userId, list in processed_clds_data:
+    for userId, list in processed_clds_data.items():
         outgoing_calls = []
         incoming_calls = []
         missed_calls = []
-        for obj in processed_clds_data['abdullahalakib12@gmail.com']['list']:
+        for obj in list['list']:
             if str(obj['call_type']) == "CallType.outgoing":
                 outgoing_calls.append(obj)
             elif str(obj['call_type']) == "CallType.incoming":
@@ -149,7 +150,10 @@ def cleanCallLog(request):
             elif str(obj['call_type']) == "CallType.rejected" or str(obj['call_type']) == "CallType.missed":
                 missed_calls.append(obj)
 
-        processed_clds_data[userId] = [
+        processed_clds_data[userId]['call_logs'] = [
             outgoing_calls, incoming_calls, missed_calls]
 
-    return HttpResponse("y")
+    for userId, list in processed_clds_data.items():
+        processed_clds_data[userId]['contacts_list'] = [createContactsList(
+            list['call_logs'][0]), createContactsList(list['call_logs'][1]), createContactsList(list['call_logs'][2])]
+    return HttpResponse(processed_clds_data['abdullahalakib12@gmail.com']['contacts_list'])
