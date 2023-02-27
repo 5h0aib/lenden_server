@@ -82,10 +82,10 @@ WSGI_APPLICATION = 'lenden_server.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'shababe$default',
+        'NAME': 'shababe$fdefault',
         'USER': 'root',
         'PASSWORD': '',
-        'HOST': '127.0.0.1',
+        'HOST': 'localhost',
         'PORT': '3306',
     }
 }
