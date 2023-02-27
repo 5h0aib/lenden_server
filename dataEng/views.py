@@ -135,6 +135,8 @@ def cleanEmailData(request):
 def cleanCallLog(request):
     clds_instances = DeepSocial.objects.all()
     processed_clds_data = {}
+
+    # Removing duplicates
     for clds_instance in clds_instances:
         processed_clds_data[clds_instance.userId] = clds_instance.call_log
 
@@ -142,6 +144,14 @@ def cleanCallLog(request):
         outgoing_calls = []
         incoming_calls = []
         missed_calls = []
+
+        # Calculating Per day No. of persons called
+        total_calls = len(list['list'])
+        per_day_no_of_persons_called = total_calls / \
+            getDaysBetween(list['list'][0], list['list'][-1])
+        processed_clds_data[userId]['per_day_no_of_persons_called'] = per_day_no_of_persons_called
+        logging.critical(per_day_no_of_persons_called)
+        # Seperating call logs based on type
         for obj in list['list']:
             if str(obj['call_type']) == "CallType.outgoing":
                 outgoing_calls.append(obj)
@@ -154,6 +164,13 @@ def cleanCallLog(request):
             outgoing_calls, incoming_calls, missed_calls]
 
     for userId, list in processed_clds_data.items():
+        # Calculating Per day Total Duration of Incoming calls
+
+        # removing original combined list of calls
+        del list['list']
+        # Creating contact list for each type of call
         processed_clds_data[userId]['contacts_list'] = [createContactsList(
             list['call_logs'][0]), createContactsList(list['call_logs'][1]), createContactsList(list['call_logs'][2])]
-    return HttpResponse(processed_clds_data['abdullahalakib12@gmail.com']['contacts_list'])
+
+   # Calculating Per day No. of persons called
+    return HttpResponse(processed_clds_data['abdullahalakib12@gmail.com']['call_logs'][0])
