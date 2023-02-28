@@ -6,6 +6,7 @@ import json
 from datetime import datetime, time, date
 from dateutil.parser import parse
 from dataEng.utils import *
+import statistics
 
 
 def cleanEmailData(request):
@@ -234,7 +235,7 @@ def cleanCallLog(request):
     return HttpResponse(processed_clds_data['samriaadiba1234@gmail.com']['Per day Per person Avg No. of Outgoing calls'])
 
 # Social Foot Print ----------------------------------------------------------------------------------------------------------------------------------------
-def cleanAppLog(request):
+def cleanAppList(request):
     al_instances = SocialFp.objects.all()
     al_data = {}
 
@@ -266,5 +267,164 @@ def cleanAppLog(request):
             if(apps['appName'] in ecom_list):
                 processed_al_data[userId]['num_of_ecom_apps'] = processed_al_data[userId]['num_of_ecom_apps'] + 1
                 processed_al_data[userId]['isEcomApp'] = True
-                
+
     return HttpResponse('yes i m done')
+
+# Mobile Foot Print ----------------------------------------------------------------------------------------------------------------------------------------
+def cleanMobileFp(request):
+    mfp_instances = MobileFp.objects.all()
+    mfp_data = {}
+
+    for mfp_instance in mfp_instances:
+        mfp_data[mfp_instance.userId] = {"no_contacts":mfp_instance.no_contacts,"no_sms":mfp_instance.no_sms}
+    
+# Getting number of calls ----------------------------------------------------------
+    clds_instances = DeepSocial.objects.all()
+
+    for clds_instance in clds_instances:
+        # Removing data before 2021
+        truncated_call_log = []
+        for call_log in clds_instance.call_log['list']:
+            default_earliest_date = datetime(2020, 12, 31)
+            if parse(call_log['date']) > default_earliest_date:
+                truncated_call_log.append(call_log)
+        # Removing duplicates
+        clds_instance.call_log['list'] = truncated_call_log
+
+        mfp_data[clds_instance.userId]["num_of_calls"] = len(clds_instance.call_log['list'])
+
+# Getting number of apps ----------------------------------------------------------
+    al_instances = SocialFp.objects.all()
+
+    for al_instance in al_instances:
+        mfp_data[al_instance.userId]["num_of_apps"] = len(al_instance.app_list['list'])
+
+    logging.critical(mfp_data)
+    return HttpResponse('$')
+
+# Survey Cleaning and getting necessary data ----------------------------------------------------------------------------------------------------------------------------------------
+
+def cleanSurvey(request):
+    survey1_instances = Survey.objects.all()
+    survey2_instances = Survey2.objects.all()
+
+    demographic_data = {}
+    psychometric_data = {}
+
+    for s1_instance in survey1_instances:
+        time_list = []
+        for answer in s1_instance.answers['results']:
+            if(answer['id']['id'] != "321"):
+
+                if(answer['id']['id'] == "p1"):
+                    psychometric_data[s1_instance.userId] = {"no_references":answer['results'][0]['result']['value']}
+
+
+                if(answer['id']['id'] == "p2"):
+                    if int(answer['results'][0]['result']['value']) > 1:
+                        psychometric_data[s1_instance.userId]['other_banks'] = True
+                    else:
+                        psychometric_data[s1_instance.userId]['other_banks'] = False
+
+                if(answer['id']['id'] == "p3"):
+                    psychometric_data[s1_instance.userId]['product_applicant_would_like_to_have_in_12months'] = answer['results'][0]['result']
+
+                if(answer['id']['id'] == "p4"):
+                    psychometric_data[s1_instance.userId]['money_now_later_3months'] = answer['results'][0]['result']['text']
+
+
+                if(answer['id']['id'] == "p5"):
+                    psychometric_data[s1_instance.userId]['money_now_later_6months'] = answer['results'][0]['result']['text']
+
+
+                if(answer['id']['id'] == "d21"):
+                    demographic_data[s1_instance.userId] = {"salary":answer['results'][0]['result']}
+
+
+                if(answer['id']['id'] == "d22"):
+                    demographic_data[s1_instance.userId]['age'] = answer['results'][0]['result']
+
+
+                if(answer['id']['id'] == "d23"):
+                    demographic_data[s1_instance.userId]['sex'] = answer['results'][0]['result']['value']
+
+
+                if(answer['id']['id'] == "d23"):
+                    demographic_data[s1_instance.userId]['sex'] = answer['results'][0]['result']['value']
+
+
+                if(answer['id']['id'] == "d24"):
+                    demographic_data[s1_instance.userId]['highschool_dummy'] = True
+                    demographic_data[s1_instance.userId]['highschool_name'] = answer['results'][0]['result']['value']
+
+
+                if(answer['id']['id'] == "d25"):
+                    demographic_data[s1_instance.userId]['college_dummy'] = True
+
+                if(answer['id']['id'] == "p6"):
+                    delta = parse(answer['results'][0]['endDate'])-parse(answer['results'][0]['startDate'])
+                    time_list.append(delta.total_seconds())
+
+
+                if(answer['id']['id'] == "p7"):
+                    delta = parse(answer['results'][0]['endDate'])-parse(answer['results'][0]['startDate'])
+                    time_list.append(delta.total_seconds())
+
+
+                if(answer['id']['id'] == "p8"):
+                    delta = parse(answer['results'][0]['endDate'])-parse(answer['results'][0]['startDate'])
+                    time_list.append(delta.total_seconds())
+
+
+                if(answer['id']['id'] == "p9"):
+                    delta = parse(answer['results'][0]['endDate'])-parse(answer['results'][0]['startDate'])
+                    time_list.append(delta.total_seconds())
+
+
+                if(answer['id']['id'] == "p10"):
+                    delta = parse(answer['results'][0]['endDate'])-parse(answer['results'][0]['startDate'])
+                    time_list.append(delta.total_seconds())
+
+
+                if(answer['id']['id'] == "p11"):
+                    delta = parse(answer['results'][0]['endDate'])-parse(answer['results'][0]['startDate'])
+                    time_list.append(delta.total_seconds())
+
+
+                if(answer['id']['id'] == "p12"):
+                    delta = parse(answer['results'][0]['endDate'])-parse(answer['results'][0]['startDate'])
+                    time_list.append(delta.total_seconds())
+
+
+                if(answer['id']['id'] == "p13"):
+                    delta = parse(answer['results'][0]['endDate'])-parse(answer['results'][0]['startDate'])
+                    time_list.append(delta.total_seconds())
+
+
+                if(answer['id']['id'] == "p14"):
+                    delta = parse(answer['results'][0]['endDate'])-parse(answer['results'][0]['startDate'])
+                    time_list.append(delta.total_seconds())
+        try:
+            if(len(time_list)==0):
+                psychometric_data[s1_instance.userId] = {'median_time_taken_expressing_agreement' : 0}
+            else:
+                psychometric_data[s1_instance.userId]['median_time_taken_expressing_agreement'] = statistics.median(time_list)
+        except KeyError:
+            psychometric_data[s1_instance.userId] = {'median_time_taken_expressing_agreement' : 0}
+        
+
+    for s2_instance in survey2_instances:
+        try:
+            psychometric_data[s2_instance.userId]['type_of_player'] = s2_instance.qp3
+        except KeyError:
+             psychometric_data[s2_instance.userId] = {'type_of_player':s2_instance.qp3}
+
+        try:
+            measure = (s2_instance.qp7["Home"] + s2_instance.qp7["Health"] )/( s2_instance.qp7["vacation"] + s2_instance.qp7["Entertainment"])
+        except ZeroDivisionError:
+            measure = s2_instance.qp7["Home"] + s2_instance.qp7["Health"]
+        psychometric_data[s2_instance.userId]['measure_of_moderation'] = measure
+
+
+# juthiahamed19@gmail.com'
+    return HttpResponse('$')
