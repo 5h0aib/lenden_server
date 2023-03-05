@@ -425,6 +425,29 @@ def cleanSurvey(request):
             measure = s2_instance.qp7["Home"] + s2_instance.qp7["Health"]
         psychometric_data[s2_instance.userId]['measure_of_moderation'] = measure
 
-
-# juthiahamed19@gmail.com'
     return HttpResponse('$')
+
+# AppUsage data ----------------------------------------------------------------------------------------------------------------------------------------
+
+def cleanAppUsage(request):
+
+    au_instances = AppUsage.objects.all()
+    ecom_appUsage = {}
+
+    ecom_list = ['daraz','android', 'alibaba', 'intl' ,'poseidon', 'amazon','mShop','shopping', 
+                 'swap','swap_ecommerce', 'evalyshop',  'pickaboo','app', 'flipkart', 'hungrynaki',
+                  'gorillamove','yoli','hoichoi', 'shop', 'goat', 'vshop' , 'foodiBd','swap_ecommerce','bongobd','rokomari','evalyshop', 'khaodao',  'mall', 'aliexpresshd','sonyliv'
+                  'citytouch','popcorntime', 'shuttle', 'obhai', 'toffee', 'sultansdine', 'bikroy',
+                 ]
+    combined = '\t'.join(ecom_list)
+
+    for au_instance in au_instances:
+        ecom_appUsage[au_instance.userId] = {"ecom_app_usage_logs" : []}
+        for app in au_instance.app_log['list']:   
+                if(app['appName'] in ecom_list):
+                    ecom_appUsage[au_instance.userId]["ecom_app_usage_logs"].append(app)
+        
+    logging.critical(ecom_appUsage)
+
+
+    return HttpResponse('$$')

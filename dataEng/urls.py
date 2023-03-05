@@ -7,4 +7,5 @@ urlpatterns = [
     path('cleanAppList',views.cleanAppList, name = "app"),
     path('cleanMobileFp',views.cleanMobileFp, name = "mobile"),
     path('cleanSurvey',views.cleanSurvey, name = "survey"),
+    path('cleanAppUsage',views.cleanAppUsage, name = "appUsage")
 ]
